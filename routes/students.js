@@ -13,58 +13,47 @@ const { Student, Campus } = require('../database/models');
 // Import a middleware to replace "try and catch" for request handler, for a concise coding (fewer lines of code)
 const ash = require('express-async-handler');
 
-/* GET ALL STUDENTS: async/await using "try-catch" */
-// router.get('/', async (req, res, next) => {
-//   try {
-//     let students = await Student.findAll({include: [Campus]});
-//     res.status(200).json(students);
-//   } 
-//   catch(err) {
-//     next(err);
-//   }
-// });
-
-/* GET ALL STUDENTS: async/await using express-async-handler (ash) */
+/* GET ALL STUDENTS */
 // Automatically catches any error and sends to Routing Error-Handling Middleware (app.js)
 // It is the same as using "try-catch" and calling next(error)
-router.get('/', ash(async(req, res) => {
-  let students = await Student.findAll({include: [Campus]});
+router.get('/', ash(async (req, res) => {
+  const students = await Student.findAll({ include: [Campus] });
   res.status(200).json(students);  // Status code 200 OK - request succeeded
 }));
 
 /* GET STUDENT BY ID */
-router.get('/:id', ash(async(req, res) => {
-  // Find student by Primary Key
-  let student = await Student.findByPk(req.params.id, {include: [Campus]});  // Get the student and its associated campus
+router.get('/:id', ash(async (req, res) => {
+  const student = await Student.findByPk(req.params.id, { include: [Campus] });
+  if (!student) {
+    return res.status(404).send("Student not found");
+  }
   res.status(200).json(student);  // Status code 200 OK - request succeeded
 }));
 
 /* ADD NEW STUDENT */
-router.post('/', function(req, res, next) {
-  Student.create(req.body)
-    .then(createdStudent => res.status(200).json(createdStudent))
-    .catch(err => next(err));
-});
+router.post('/', ash(async (req, res) => {
+  const newStudent = await Student.create(req.body);
+  res.status(201).json(newStudent);  // Status code 201 Created - resource created
+}));
 
 /* DELETE STUDENT */
-router.delete('/:id', function(req, res, next) {
-  Student.destroy({
-    where: {
-      id: req.params.id
-    }
-  })
-    .then(() => res.status(200).json("Deleted a student!"))
-    .catch(err => next(err));
-});
+router.delete('/:id', ash(async (req, res) => {
+  const deleted = await Student.destroy({ where: { id: req.params.id } });
+  if (deleted) {
+    res.status(204).end();  // Status code 204 No Content - successful deletion
+  } else {
+    res.status(404).send("Student not found");
+  }
+}));
 
 /* EDIT STUDENT */
-router.put('/:id', ash(async(req, res) => {
-  await Student.update(req.body,
-        { where: {id: req.params.id} }
-  );
-  // Find student by Primary Key
-  let student = await Student.findByPk(req.params.id);
-  res.status(201).json(student);  // Status code 201 Created - successful creation of a resource
+router.put('/:id', ash(async (req, res) => {
+  const student = await Student.findByPk(req.params.id);
+  if (!student) {
+    return res.status(404).send("Student not found");
+  }
+  await student.update(req.body);
+  res.status(200).json(student);  // Status code 200 OK - resource updated
 }));
 
 // Export router, so that it can be imported to construct the apiRouter (app.js)
