@@ -6,8 +6,7 @@ It defines the campus model for the database.
 const Sequelize = require('sequelize');  // Import Sequelize
 const db = require('../db');  // Import Sequelize database instance called "db"
 
-// Define the campus model
-const Campus = db.define("campus", {
+const Campus = db.define('campus', {
   name: {
     type: Sequelize.STRING,
     allowNull: false
@@ -19,9 +18,13 @@ const Campus = db.define("campus", {
   },
 
   description: {
+    type: Sequelize.TEXT
+  },
+
+  imageUrl: {
     type: Sequelize.STRING,
+    defaultValue: 'https://placehold.co/300x200'
   }
 });
 
-// Export the campus model
 module.exports = Campus;
