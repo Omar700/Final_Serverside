@@ -48,7 +48,13 @@ router.put("/:id", async (req, res, next) => {
     if (!campus) return res.status(404).send("Campus not found");
 
     await campus.update(req.body);
-    res.json(campus);
+
+    // After updating, re-fetch campus with associated students
+    const fullCampus = await Campus.findByPk(campus.id, {
+      include: Student
+    });
+
+    res.json(fullCampus);
   } catch (err) {
     next(err);
   }
