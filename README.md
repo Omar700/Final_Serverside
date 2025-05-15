@@ -42,3 +42,6 @@ In the `server-starter-code/database/utils/configDB.js` file, replace the `dBpwd
   const dbUser = 'postgres';
   const dbPwd = '<your password>';
 ```
+----------
+### Group members 
+Omar Arafa-Omar700
